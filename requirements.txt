@@ -1,0 +1,26 @@
+llama-index==0.9.48
+llama-index-llms-azure-openai==0.1.7
+llama-index-embeddings-azure-openai==0.1.9
+pyTigerGraph==1.7.0
+flask==3.0.0
+flask-cors==4.0.0
+python-dotenv==1.0.0
+gunicorn==21.2.0
+asyncio==3.4.3
+
+# .env.template (Copy to .env and fill in your values)
+# Azure OpenAI Configuration
+AZURE_OPENAI_ENDPOINT=https://your-openai-resource.openai.azure.com/
+AZURE_OPENAI_KEY=your_azure_openai_key_here
+AZURE_OPENAI_DEPLOYMENT=gpt-4
+AZURE_EMBEDDING_DEPLOYMENT=text-embedding-ada-002
+
+# TigerGraph Configuration
+TIGERGRAPH_HOST=http://localhost:14240
+TIGERGRAPH_USERNAME=tigergraph
+TIGERGRAPH_PASSWORD=tigergraph
+TIGERGRAPH_GRAPH_NAME=SocialNetwork
+
+# Flask Configuration
+FLASK_ENV=development
+FLASK_DEBUG=True

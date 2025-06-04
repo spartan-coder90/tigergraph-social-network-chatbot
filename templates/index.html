@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TigerGraph Social Network Chatbot</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            display: flex;
+            width: 95%;
+            max-width: 1400px;
+            height: 90vh;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 300px;
+            background: #f8f9fa;
+            border-right: 1px solid #e9ecef;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .sidebar h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 10px;
+            background: #e8f5e8;
+            border-radius: 8px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #28a745;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .sample-queries {
+            margin-bottom: 30px;
+        }
+
+        .sample-queries h3 {
+            color: #495057;
+            margin-bottom: 15px;
+            font-size: 1rem;
+        }
+
+        .sample-query {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .sample-query:hover {
+            background: #e3f2fd;
+            border-color: #2196f3;
+            transform: translateY(-1px);
+        }
+
+        .query-info {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .query-info h4 {
+            color: #856404;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+
+        .query-info ul {
+            color: #856404;
+            font-size: 0.8rem;
+            margin-left: 15px;
+        }
+
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .chat-header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .chat-header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .chat-header p {
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-bubble {
+            max-width: 70%;
+            padding: 15px 20px;
+            border-radius: 20px;
+            word-wrap: break-word;
+            line-height: 1.4;
+        }
+
+        .message.user .message-bubble {
+            background: #007bff;
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+
+        .message.bot .message-bubble {
+            background: white;
+            color: #333;
+            border: 1px solid #e9ecef;
+            border-bottom-left-radius: 5px;
+        }
+
+        .message-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            margin: 0 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            font-size: 0.8rem;
+        }
+
+        .message.user .message-avatar {
+            background: #007bff;
+        }
+
+        .message.bot .message-avatar {
+            background: #28a745;
+        }
+
+        .message-time {
+            font-size: 0.7rem;
+            opacity: 0.6;
+            margin-top: 5px;
+        }
+
+        .chat-input-container {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .chat-input-wrapper {
+            display: flex;
+            align-items: center;
+            background: #f8f9fa;
+            border-radius: 25px;
+            padding: 5px;
+        }
+
+        .chat-input {
+            flex: 1;
+            border: none;
+            outline: none;
+            padding: 15px 20px;
+            background: transparent;
+            font-size: 1rem;
+        }
+
+        .send-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-right: 5px;
+        }
+
+        .send-button:hover {
+            background: #0056b3;
+            transform: scale(1.05);
+        }
+
+        .send-button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            margin: 10px 0;
+        }
+
+        .typing-dots {
+            display: flex;
+            align-items: center;
+            margin-left: 45px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #007bff;
+            margin: 0 2px;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+                opacity: 0.4;
+            }
+            30% {
+                transform: translateY(-10px);
+                opacity: 1;
+            }
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            border-radius: 8px;
+            padding: 10px;
+            margin: 10px 0;
+        }
+
+        .welcome-message {
+            text-align: center;
+            color: #6c757d;
+            margin: 50px 20px;
+            line-height: 1.6;
+        }
+
+        .welcome-message h3 {
+            color: #495057;
+            margin-bottom: 15px;
+        }
+
+        .json-output {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                width: 100%;
+                height: 100vh;
+                border-radius: 0;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                max-height: 200px;
+                border-right: none;
+                border-bottom: 1px solid #e9ecef;
+            }
+
+            .message-bubble {
+                max-width: 85%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <h2>🐅 TigerGraph Chat</h2>
+            
+            <div class="status-indicator">
+                <div class="status-dot"></div>
+                <span id="connection-status">Connected</span>
+            </div>
+
+            <div class="sample-queries">
+                <h3>💡 Try these questions:</h3>
+                <div class="sample-query" onclick="sendSampleQuery('Tell me about person_001')">
+                    Tell me about person_001
+                </div>
+                <div class="sample-query" onclick="sendSampleQuery('Who works at TechCorp?')">
+                    Who works at TechCorp?
+                </div>
+                <div class="sample-query" onclick="sendSampleQuery('Find connections between person_001 and person_003')">
+                    Find connections between people
+                </div>
+                <div class="sample-query" onclick="sendSampleQuery('Who are the top 5 influencers?')">
+                    Who are the top 5 influencers?
+                </div>
+                <div class="sample-query" onclick="sendSampleQuery('Show me network analytics')">
+                    Show me network analytics
+                </div>
+                <div class="sample-query" onclick="sendSampleQuery('List all people in the database')">
+                    List all people
+                </div>
+                <div class="sample-query" onclick="sendSampleQuery('List all companies')">
+                    List all companies
+                </div>
+            </div>
+
+            <div class="query-info">
+                <h4>📋 Available Data:</h4>
+                <ul>
+                    <li>15 People (person_001 to person_015)</li>
+                    <li>7 Companies (TechCorp, DataSystems, etc.)</li>
+                    <li>5 Cities (SF, NYC, Seattle, Austin, Boston)</li>
+                    <li>Friendship and work connections</li>
+                </ul>
+            </div>
+
+            <div class="query-info">
+                <h4>🔍 Query Types:</h4>
+                <ul>
+                    <li>Person information lookup</li>
+                    <li>Connection finding</li>
+                    <li>Company employee lists</li>
+                    <li>Influence analysis</li>
+                    <li>Network statistics</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Chat Container -->
+        <div class="chat-container">
+            <div class="chat-header">
+                <h1>🕸️ Social Network Explorer</h1>
+                <p>Ask questions about people, companies, and connections in natural language</p>
+            </div>
+
+            <div class="chat-messages" id="chat-messages">
+                <div class="welcome-message">
+                    <h3>Welcome to TigerGraph Social Network Explorer! 🎉</h3>
+                    <p>I can help you explore the social network data using natural language questions.</p>
+                    <p>Try asking about specific people, company employees, connections between people, or network analytics.</p>
+                    <p><strong>Click on any sample question on the left to get started!</strong></p>
+                </div>
+            </div>
+
+            <div class="typing-indicator" id="typing-indicator">
+                <div class="typing-dots">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            </div>
+
+            <div class="chat-input-container">
+                <div class="chat-input-wrapper">
+                    <input 
+                        type="text" 
+                        class="chat-input" 
+                        id="chat-input" 
+                        placeholder="Ask about people, companies, or connections..."
+                        onkeypress="handleKeyPress(event)"
+                    >
+                    <button class="send-button" id="send-button" onclick="sendMessage()">
+                        ➤
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let isProcessing = false;
+
+        // Check connection status on page load
+        window.addEventListener('load', function() {
+            checkConnectionStatus();
+        });
+
+        async function checkConnectionStatus() {
+            try {
+                const response = await fetch('/api/test-connection');
+                const data = await response.json();
+                
+                const statusElement = document.getElementById('connection-status');
+                if (data.status === 'success') {
+                    statusElement.textContent = 'Connected to TigerGraph';
+                    statusElement.parentElement.style.background = '#e8f5e8';
+                } else {
+                    statusElement.textContent = 'Connection Error';
+                    statusElement.parentElement.style.background = '#f8d7da';
+                }
+            } catch (error) {
+                const statusElement = document.getElementById('connection-status');
+                statusElement.textContent = 'Connection Failed';
+                statusElement.parentElement.style.background = '#f8d7da';
+            }
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter' && !isProcessing) {
+                sendMessage();
+            }
+        }
+
+        function sendSampleQuery(query) {
+            const chatInput = document.getElementById('chat-input');
+            chatInput.value = query;
+            sendMessage();
+        }
+
+        async function sendMessage() {
+            const chatInput = document.getElementById('chat-input');
+            const message = chatInput.value.trim();
+            
+            if (!message || isProcessing) return;
+
+            // Clear input and disable sending
+            chatInput.value = '';
+            setProcessing(true);
+
+            // Add user message to chat
+            addMessage(message, 'user');
+
+            // Show typing indicator
+            showTypingIndicator();
+
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message: message })
+                });
+
+                const data = await response.json();
+                
+                // Hide typing indicator
+                hideTypingIndicator();
+
+                if (data.status === 'success') {
+                    addMessage(data.response, 'bot');
+                } else {
+                    addMessage(`I'm sorry, I encountered an error: ${data.response}`, 'bot', true);
+                }
+            } catch (error) {
+                hideTypingIndicator();
+                addMessage('I\'m sorry, I couldn\'t connect to the server. Please try again.', 'bot', true);
+                console.error('Error:', error);
+            } finally {
+                setProcessing(false);
+            }
+        }
+
+        function addMessage(content, sender, isError = false) {
+            const chatMessages = document.getElementById('chat-messages');
+            
+            // Remove welcome message if this is the first real message
+            const welcomeMessage = chatMessages.querySelector('.welcome-message');
+            if (welcomeMessage && (sender === 'user' || sender === 'bot')) {
+                welcomeMessage.remove();
+            }
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            avatar.textContent = sender === 'user' ? 'U' : '🤖';
+
+            const bubbleDiv = document.createElement('div');
+            bubbleDiv.className = 'message-bubble';
+            
+            if (isError) {
+                bubbleDiv.style.background = '#f8d7da';
+                bubbleDiv.style.color = '#721c24';
+                bubbleDiv.style.border = '1px solid #f5c6cb';
+            }
+
+            // Check if content looks like JSON and format it
+            if (content.includes('"status":') || content.includes('"message":')) {
+                try {
+                    const jsonData = JSON.parse(content);
+                    bubbleDiv.innerHTML = formatJSONResponse(jsonData);
+                } catch (e) {
+                    bubbleDiv.textContent = content;
+                }
+            } else {
+                bubbleDiv.textContent = content;
+            }
+
+            const timeDiv = document.createElement('div');
+            timeDiv.className = 'message-time';
+            timeDiv.textContent = new Date().toLocaleTimeString();
+
+            messageDiv.appendChild(avatar);
+            const messageContent = document.createElement('div');
+            messageContent.appendChild(bubbleDiv);
+            messageContent.appendChild(timeDiv);
+            messageDiv.appendChild(messageContent);
+
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function formatJSONResponse(data) {
+            if (data.status === 'success') {
+                let formatted = `<strong>${data.message || 'Success'}</strong><br><br>`;
+                
+                // Handle different types of data
+                if (data.person) {
+                    const person = data.person;
+                    formatted += `
+                        <strong>👤 ${person.first_name} ${person.last_name}</strong><br>
+                        📧 ${person.email}<br>
+                        🎂 Age: ${person.age}<br>
+                        💼 ${person.job_title}<br>
+                        🏢 ${person.company_name}<br>
+                        📍 ${person.city_name}, ${person.state}<br>
+                        💰 Salary: $${person.salary?.toLocaleString() || 'N/A'}
+                    `;
+                } else if (data.employees) {
+                    formatted += `<strong>👥 ${data.count} Employee(s):</strong><br><br>`;
+                    data.employees.forEach(emp => {
+                        formatted += `
+                            • <strong>${emp.full_name}</strong><br>
+                            &nbsp;&nbsp;📋 ${emp.job_title} (${emp.department})<br>
+                            &nbsp;&nbsp;💰 $${emp.salary?.toLocaleString()}<br>
+                            &nbsp;&nbsp;📧 ${emp.email}<br><br>
+                        `;
+                    });
+                } else if (data.influencers) {
+                    formatted += `<strong>⭐ Top ${data.count} Influencer(s):</strong><br><br>`;
+                    data.influencers.forEach((inf, index) => {
+                        formatted += `
+                            ${index + 1}. <strong>${inf.full_name}</strong><br>
+                            &nbsp;&nbsp;💼 ${inf.job_title} at ${inf.company_name}<br>
+                            &nbsp;&nbsp;👥 ${inf.friend_count} friends, ${inf.follower_count} followers<br>
+                            &nbsp;&nbsp;📊 Influence Score: ${inf.influence_score.toFixed(1)}<br><br>
+                        `;
+                    });
+                } else if (data.connections) {
+                    formatted += `<strong>🔗 ${data.connections.length} Connection(s):</strong><br><br>`;
+                    data.connections.forEach(conn => {
+                        formatted += `• ${conn.path} (${conn.relationship_type})<br>`;
+                    });
+                } else if (data.metrics) {
+                    formatted += `<strong>📊 Network Analytics:</strong><br><br>`;
+                    data.metrics.forEach(metric => {
+                        formatted += `• <strong>${metric.metric_name.replace(/_/g, ' ').toUpperCase()}:</strong> ${metric.value}<br>`;
+                    });
+                } else if (data.people) {
+                    formatted += `<strong>👥 ${data.count} People:</strong><br><br>`;
+                    data.people.forEach(person => {
+                        formatted += `• <strong>${person.name}</strong> (${person.id})<br>&nbsp;&nbsp;${person.job_title}<br>`;
+                    });
+                } else if (data.companies) {
+                    formatted += `<strong>🏢 ${data.count} Companies:</strong><br><br>`;
+                    data.companies.forEach(company => {
+                        formatted += `• <strong>${company.name}</strong><br>&nbsp;&nbsp;${company.industry} (${company.size})<br>`;
+                    });
+                }
+                
+                return formatted;
+            } else {
+                return `<strong>⚠️ ${data.message || 'Error occurred'}</strong>`;
+            }
+        }
+
+        function showTypingIndicator() {
+            document.getElementById('typing-indicator').style.display = 'flex';
+            const chatMessages = document.getElementById('chat-messages');
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function hideTypingIndicator() {
+            document.getElementById('typing-indicator').style.display = 'none';
+        }
+
+        function setProcessing(processing) {
+            isProcessing = processing;
+            const sendButton = document.getElementById('send-button');
+            const chatInput = document.getElementById('chat-input');
+            
+            sendButton.disabled = processing;
+            chatInput.disabled = processing;
+            
+            if (processing) {
+                sendButton.textContent = '⏳';
+                chatInput.placeholder = 'Processing...';
+            } else {
+                sendButton.textContent = '➤';
+                chatInput.placeholder = 'Ask about people, companies, or connections...';
+                chatInput.focus();
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,345 @@
+# TigerGraph Schema Creation and Setup Script
+# Run this script in TigerGraph Studio or via GSQL command line
+
+# Create a new graph
+CREATE GRAPH SocialNetwork()
+
+# Use the graph
+USE GRAPH SocialNetwork
+
+# Create vertex types
+CREATE VERTEX Person (
+    PRIMARY_ID id STRING,
+    first_name STRING,
+    last_name STRING,
+    age INT,
+    email STRING,
+    city_id STRING,
+    job_title STRING,
+    salary INT DEFAULT 0,
+    created_date DATETIME DEFAULT NOW()
+) WITH STATS="OUTDEGREE_BY_EDGETYPE"
+
+CREATE VERTEX Company (
+    PRIMARY_ID id STRING,
+    name STRING,
+    industry STRING,
+    size STRING,
+    city_id STRING,
+    founded_year INT,
+    revenue DOUBLE DEFAULT 0.0
+) WITH STATS="OUTDEGREE_BY_EDGETYPE"
+
+CREATE VERTEX City (
+    PRIMARY_ID id STRING,
+    name STRING,
+    state STRING,
+    country STRING,
+    population INT,
+    latitude DOUBLE,
+    longitude DOUBLE
+) WITH STATS="OUTDEGREE_BY_EDGETYPE"
+
+# Create edge types
+CREATE DIRECTED EDGE FRIENDS_WITH (
+    FROM Person,
+    TO Person,
+    since_date DATETIME DEFAULT NOW(),
+    strength DOUBLE DEFAULT 1.0
+) WITH REVERSE_EDGE="FRIENDS_WITH"
+
+CREATE DIRECTED EDGE WORKS_AT (
+    FROM Person,
+    TO Company,
+    start_date DATETIME DEFAULT NOW(),
+    position STRING,
+    department STRING,
+    is_current BOOL DEFAULT TRUE
+)
+
+CREATE DIRECTED EDGE LOCATED_IN (
+    FROM Person|Company,
+    TO City,
+    since_date DATETIME DEFAULT NOW()
+)
+
+CREATE DIRECTED EDGE FOLLOWS (
+    FROM Person,
+    TO Person,
+    follow_date DATETIME DEFAULT NOW()
+)
+
+CREATE DIRECTED EDGE PARTNERS_WITH (
+    FROM Company,
+    TO Company,
+    partnership_type STRING,
+    start_date DATETIME DEFAULT NOW(),
+    contract_value DOUBLE DEFAULT 0.0
+)
+
+# Create the graph schema
+CREATE GRAPH SocialNetwork (
+    Person, Company, City,
+    FRIENDS_WITH, WORKS_AT, LOCATED_IN, FOLLOWS, PARTNERS_WITH
+)
+
+# Install the graph
+INSTALL GRAPH SocialNetwork
+
+# Use the installed graph
+USE GRAPH SocialNetwork
+
+# ================================
+# LOAD TEST DATA
+# ================================
+
+# Insert Cities
+INSERT INTO City VALUES 
+("city_001", "San Francisco", "CA", "USA", 875000, 37.7749, -122.4194),
+("city_002", "New York", "NY", "USA", 8400000, 40.7128, -74.0060),
+("city_003", "Seattle", "WA", "USA", 750000, 47.6062, -122.3321),
+("city_004", "Austin", "TX", "USA", 965000, 30.2672, -97.7431),
+("city_005", "Boston", "MA", "USA", 685000, 42.3601, -71.0589)
+
+# Insert Companies
+INSERT INTO Company VALUES 
+("comp_001", "TechCorp", "Technology", "Large", "city_001", 2010, 50000000.0),
+("comp_002", "DataSystems", "Software", "Medium", "city_002", 2015, 25000000.0),
+("comp_003", "CloudVentures", "Cloud Computing", "Large", "city_003", 2008, 75000000.0),
+("comp_004", "StartupX", "AI/ML", "Small", "city_004", 2020, 5000000.0),
+("comp_005", "FinanceHub", "Financial Services", "Large", "city_005", 2005, 100000000.0),
+("comp_006", "MobileApps Inc", "Mobile Development", "Medium", "city_001", 2018, 15000000.0),
+("comp_007", "CyberSecurity Pro", "Cybersecurity", "Medium", "city_002", 2012, 30000000.0)
+
+# Insert People
+INSERT INTO Person VALUES 
+("person_001", "John", "Smith", 32, "john.smith@email.com", "city_001", "Software Engineer", 120000),
+("person_002", "Sarah", "Johnson", 28, "sarah.j@email.com", "city_002", "Data Scientist", 130000),
+("person_003", "Mike", "Brown", 35, "mike.brown@email.com", "city_003", "Product Manager", 150000),
+("person_004", "Emily", "Davis", 29, "emily.davis@email.com", "city_001", "UX Designer", 105000),
+("person_005", "David", "Wilson", 41, "david.w@email.com", "city_005", "Senior Developer", 140000),
+("person_006", "Lisa", "Anderson", 26, "lisa.a@email.com", "city_004", "Marketing Manager", 95000),
+("person_007", "Robert", "Taylor", 38, "robert.t@email.com", "city_002", "DevOps Engineer", 125000),
+("person_008", "Jennifer", "Martinez", 33, "jennifer.m@email.com", "city_003", "Data Analyst", 85000),
+("person_009", "Kevin", "Garcia", 30, "kevin.g@email.com", "city_001", "Frontend Developer", 110000),
+("person_010", "Amanda", "Rodriguez", 27, "amanda.r@email.com", "city_005", "Backend Developer", 115000),
+("person_011", "Chris", "Lee", 36, "chris.lee@email.com", "city_004", "Tech Lead", 160000),
+("person_012", "Michelle", "White", 31, "michelle.w@email.com", "city_002", "Project Manager", 120000),
+("person_013", "Daniel", "Clark", 25, "daniel.c@email.com", "city_003", "Junior Developer", 75000),
+("person_014", "Jessica", "Lewis", 34, "jessica.l@email.com", "city_001", "Senior Analyst", 135000),
+("person_015", "Matthew", "Walker", 29, "matthew.w@email.com", "city_005", "QA Engineer", 95000)
+
+# Insert Work Relationships
+INSERT INTO WORKS_AT VALUES 
+("person_001", "comp_001", "2022-01-15", "Software Engineer", "Engineering"),
+("person_002", "comp_002", "2021-03-20", "Data Scientist", "Analytics"),
+("person_003", "comp_003", "2020-06-10", "Product Manager", "Product"),
+("person_004", "comp_001", "2023-02-01", "UX Designer", "Design"),
+("person_005", "comp_005", "2019-08-15", "Senior Developer", "Engineering"),
+("person_006", "comp_004", "2022-05-30", "Marketing Manager", "Marketing"),
+("person_007", "comp_002", "2021-11-12", "DevOps Engineer", "Infrastructure"),
+("person_008", "comp_003", "2022-09-05", "Data Analyst", "Analytics"),
+("person_009", "comp_001", "2023-01-20", "Frontend Developer", "Engineering"),
+("person_010", "comp_005", "2021-07-18", "Backend Developer", "Engineering"),
+("person_011", "comp_004", "2020-12-01", "Tech Lead", "Engineering"),
+("person_012", "comp_007", "2022-04-15", "Project Manager", "Operations"),
+("person_013", "comp_003", "2023-06-01", "Junior Developer", "Engineering"),
+("person_014", "comp_006", "2021-10-25", "Senior Analyst", "Analytics"),
+("person_015", "comp_005", "2022-08-30", "QA Engineer", "Quality")
+
+# Insert Location Relationships
+INSERT INTO LOCATED_IN VALUES 
+("person_001", "city_001"), ("person_002", "city_002"), ("person_003", "city_003"),
+("person_004", "city_001"), ("person_005", "city_005"), ("person_006", "city_004"),
+("person_007", "city_002"), ("person_008", "city_003"), ("person_009", "city_001"),
+("person_010", "city_005"), ("person_011", "city_004"), ("person_012", "city_002"),
+("person_013", "city_003"), ("person_014", "city_001"), ("person_015", "city_005"),
+("comp_001", "city_001"), ("comp_002", "city_002"), ("comp_003", "city_003"),
+("comp_004", "city_004"), ("comp_005", "city_005"), ("comp_006", "city_001"), ("comp_007", "city_002")
+
+# Insert Friendships
+INSERT INTO FRIENDS_WITH VALUES 
+("person_001", "person_004", "2022-02-01", 0.9),
+("person_001", "person_009", "2023-03-15", 0.8),
+("person_002", "person_007", "2021-05-20", 0.85),
+("person_003", "person_008", "2022-10-10", 0.75),
+("person_004", "person_009", "2023-02-28", 0.9),
+("person_005", "person_010", "2021-08-01", 0.95),
+("person_006", "person_011", "2022-06-15", 0.8),
+("person_007", "person_012", "2022-05-01", 0.7),
+("person_008", "person_013", "2023-07-01", 0.6),
+("person_009", "person_014", "2023-04-10", 0.85),
+("person_010", "person_015", "2022-09-15", 0.9),
+("person_002", "person_012", "2021-12-01", 0.75),
+("person_003", "person_013", "2023-06-15", 0.7),
+("person_005", "person_015", "2022-09-01", 0.8)
+
+# Insert Follows (Professional network)
+INSERT INTO FOLLOWS VALUES 
+("person_001", "person_003", "2022-01-20"),
+("person_002", "person_005", "2021-04-15"),
+("person_004", "person_001", "2023-02-10"),
+("person_006", "person_011", "2022-06-01"),
+("person_007", "person_002", "2021-11-20"),
+("person_008", "person_003", "2022-09-10"),
+("person_009", "person_001", "2023-01-25"),
+("person_010", "person_005", "2021-07-25"),
+("person_013", "person_008", "2023-06-05"),
+("person_014", "person_009", "2023-04-15")
+
+# Insert Company Partnerships
+INSERT INTO PARTNERS_WITH VALUES 
+("comp_001", "comp_006", "Technology Partnership", "2023-01-01", 2000000.0),
+("comp_002", "comp_007", "Security Services", "2022-06-15", 1500000.0),
+("comp_003", "comp_001", "Cloud Infrastructure", "2022-03-01", 5000000.0),
+("comp_004", "comp_002", "Data Analytics", "2023-02-15", 500000.0),
+("comp_005", "comp_007", "Cybersecurity", "2022-11-01", 3000000.0)
+
+# ================================
+# CREATE AND INSTALL QUERIES
+# ================================
+
+# Query 1: Get Person Information
+CREATE QUERY GetPersonInfo(STRING person_id) FOR GRAPH SocialNetwork {
+    TYPEDEF TUPLE<STRING id, STRING first_name, STRING last_name, INT age, 
+                  STRING email, STRING job_title, INT salary, STRING company_name, 
+                  STRING city_name, STRING state> PersonInfo;
+    
+    ListAccum<PersonInfo> @@result;
+    
+    people = SELECT p FROM Person:p 
+             WHERE p.id == person_id;
+    
+    result = SELECT p FROM people:p -(WORKS_AT)- Company:c -(LOCATED_IN)- City:city
+             ACCUM @@result += PersonInfo(p.id, p.first_name, p.last_name, p.age, 
+                                        p.email, p.job_title, p.salary, c.name, 
+                                        city.name, city.state);
+    
+    PRINT @@result;
+}
+
+# Query 2: Find Connections Between People
+CREATE QUERY FindConnections(STRING source_person, STRING target_person, INT max_hops = 3) FOR GRAPH SocialNetwork {
+    TYPEDEF TUPLE<STRING from_id, STRING to_id, STRING relationship_type, STRING path> ConnectionPath;
+    
+    ListAccum<ConnectionPath> @@paths;
+    SetAccum<VERTEX> @@visited;
+    
+    # Find direct friendships
+    source = SELECT s FROM Person:s WHERE s.id == source_person;
+    
+    # BFS to find shortest path
+    current_level = source;
+    INT hop_count = 0;
+    
+    WHILE current_level.size() > 0 AND hop_count < max_hops DO
+        current_level = SELECT t FROM current_level:s -(FRIENDS_WITH)- Person:t
+                       WHERE t.id == target_person AND t NOT IN @@visited
+                       ACCUM @@paths += ConnectionPath(s.id, t.id, "FRIENDS_WITH", 
+                                                     s.first_name + " -> " + t.first_name),
+                             @@visited += s;
+        hop_count = hop_count + 1;
+    END;
+    
+    # Also check work connections
+    work_connections = SELECT t FROM Person:s -(WORKS_AT)- Company:c -(_)- Person:t
+                      WHERE s.id == source_person AND t.id == target_person
+                      ACCUM @@paths += ConnectionPath(s.id, t.id, "WORK_COLLEAGUE", 
+                                                    s.first_name + " works with " + t.first_name + " at " + c.name);
+    
+    PRINT @@paths;
+}
+
+# Query 3: Get Company Employees
+CREATE QUERY GetCompanyEmployees(STRING company_name, STRING department = "") FOR GRAPH SocialNetwork {
+    TYPEDEF TUPLE<STRING person_id, STRING full_name, STRING job_title, 
+                  STRING department, INT salary, STRING email> Employee;
+    
+    ListAccum<Employee> @@employees;
+    
+    companies = SELECT c FROM Company:c WHERE c.name == company_name;
+    
+    employees = SELECT p FROM companies:c -(WORKS_AT)- Person:p
+               WHERE department == "" OR WORKS_AT.department == department
+               ACCUM @@employees += Employee(p.id, p.first_name + " " + p.last_name,
+                                           p.job_title, WORKS_AT.department, 
+                                           p.salary, p.email)
+               ORDER BY p.salary DESC;
+    
+    PRINT @@employees;
+}
+
+# Query 4: Find Top Influencers (by connection count)
+CREATE QUERY FindTopInfluencers(INT limit_count = 10) FOR GRAPH SocialNetwork {
+    TYPEDEF TUPLE<STRING person_id, STRING full_name, STRING job_title, 
+                  STRING company_name, INT friend_count, INT follower_count, 
+                  DOUBLE influence_score> Influencer;
+    
+    ListAccum<Influencer> @@influencers;
+    
+    people = SELECT p FROM Person:p
+            ACCUM 
+                INT friend_count = p.outdegree("FRIENDS_WITH") + p.indegree("FRIENDS_WITH"),
+                INT follower_count = p.indegree("FOLLOWS"),
+                DOUBLE influence_score = friend_count * 1.0 + follower_count * 2.0;
+    
+    # Get company info for each person
+    result = SELECT p FROM people:p -(WORKS_AT)- Company:c
+             ACCUM @@influencers += Influencer(p.id, p.first_name + " " + p.last_name,
+                                             p.job_title, c.name,
+                                             p.outdegree("FRIENDS_WITH") + p.indegree("FRIENDS_WITH"),
+                                             p.indegree("FOLLOWS"),
+                                             (p.outdegree("FRIENDS_WITH") + p.indegree("FRIENDS_WITH")) * 1.0 + 
+                                             p.indegree("FOLLOWS") * 2.0)
+             ORDER BY influence_score DESC
+             LIMIT limit_count;
+    
+    PRINT @@influencers;
+}
+
+# Query 5: Get Network Analytics
+CREATE QUERY GetNetworkAnalytics() FOR GRAPH SocialNetwork {
+    TYPEDEF TUPLE<STRING metric_name, DOUBLE value, STRING description> NetworkMetric;
+    
+    ListAccum<NetworkMetric> @@metrics;
+    
+    # Count vertices
+    people_count = SELECT COUNT(*) FROM Person:p;
+    companies_count = SELECT COUNT(*) FROM Company:c;
+    cities_count = SELECT COUNT(*) FROM City:city;
+    
+    # Count edges
+    friendships_count = SELECT COUNT(*) FROM Person:p -(FRIENDS_WITH)- Person:q;
+    work_relationships_count = SELECT COUNT(*) FROM Person:p -(WORKS_AT)- Company:c;
+    follows_count = SELECT COUNT(*) FROM Person:p -(FOLLOWS)- Person:q;
+    
+    # Calculate average connections per person
+    total_people = people_count.size();
+    total_friendships = friendships_count.size();
+    avg_friends = total_friendships * 1.0 / total_people;
+    
+    # Calculate network density
+    max_possible_connections = total_people * (total_people - 1);
+    network_density = total_friendships * 2.0 / max_possible_connections;
+    
+    @@metrics += NetworkMetric("total_people", total_people, "Total number of people in network");
+    @@metrics += NetworkMetric("total_companies", companies_count.size(), "Total number of companies");
+    @@metrics += NetworkMetric("total_cities", cities_count.size(), "Total number of cities");
+    @@metrics += NetworkMetric("total_friendships", total_friendships, "Total friendship connections");
+    @@metrics += NetworkMetric("total_work_relationships", work_relationships_count.size(), "Total work relationships");
+    @@metrics += NetworkMetric("total_follows", follows_count.size(), "Total follow relationships");
+    @@metrics += NetworkMetric("avg_friends_per_person", avg_friends, "Average friends per person");
+    @@metrics += NetworkMetric("network_density", network_density, "Network density (0-1)");
+    
+    PRINT @@metrics;
+}
+
+# Install all queries
+INSTALL QUERY GetPersonInfo
+INSTALL QUERY FindConnections  
+INSTALL QUERY GetCompanyEmployees
+INSTALL QUERY FindTopInfluencers
+INSTALL QUERY GetNetworkAnalytics
+
+# Show installed queries
+SHOW QUERY *
