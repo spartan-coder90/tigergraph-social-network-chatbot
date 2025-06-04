@@ -1,4 +1,4 @@
-# TigerGraph Schema Creation and Setup Script
+# TigerGraph Schema Creation and Setup Script - CORRECTED VERSION
 # Run this script in TigerGraph Studio or via GSQL command line
 
 # Create a new graph
@@ -17,7 +17,7 @@ CREATE VERTEX Person (
     city_id STRING,
     job_title STRING,
     salary INT DEFAULT 0,
-    created_date DATETIME DEFAULT NOW()
+    created_date DATETIME DEFAULT to_datetime("2024-01-01 00:00:00")
 ) WITH STATS="OUTDEGREE_BY_EDGETYPE"
 
 CREATE VERTEX Company (
@@ -44,14 +44,14 @@ CREATE VERTEX City (
 CREATE DIRECTED EDGE FRIENDS_WITH (
     FROM Person,
     TO Person,
-    since_date DATETIME DEFAULT NOW(),
+    since_date DATETIME DEFAULT to_datetime("2024-01-01 00:00:00"),
     strength DOUBLE DEFAULT 1.0
 ) WITH REVERSE_EDGE="FRIENDS_WITH"
 
 CREATE DIRECTED EDGE WORKS_AT (
     FROM Person,
     TO Company,
-    start_date DATETIME DEFAULT NOW(),
+    start_date DATETIME DEFAULT to_datetime("2024-01-01 00:00:00"),
     position STRING,
     department STRING,
     is_current BOOL DEFAULT TRUE
@@ -60,20 +60,20 @@ CREATE DIRECTED EDGE WORKS_AT (
 CREATE DIRECTED EDGE LOCATED_IN (
     FROM Person|Company,
     TO City,
-    since_date DATETIME DEFAULT NOW()
+    since_date DATETIME DEFAULT to_datetime("2024-01-01 00:00:00")
 )
 
 CREATE DIRECTED EDGE FOLLOWS (
     FROM Person,
     TO Person,
-    follow_date DATETIME DEFAULT NOW()
+    follow_date DATETIME DEFAULT to_datetime("2024-01-01 00:00:00")
 )
 
 CREATE DIRECTED EDGE PARTNERS_WITH (
     FROM Company,
     TO Company,
     partnership_type STRING,
-    start_date DATETIME DEFAULT NOW(),
+    start_date DATETIME DEFAULT to_datetime("2024-01-01 00:00:00"),
     contract_value DOUBLE DEFAULT 0.0
 )
 
@@ -113,87 +113,102 @@ INSERT INTO Company VALUES
 
 # Insert People
 INSERT INTO Person VALUES 
-("person_001", "John", "Smith", 32, "john.smith@email.com", "city_001", "Software Engineer", 120000),
-("person_002", "Sarah", "Johnson", 28, "sarah.j@email.com", "city_002", "Data Scientist", 130000),
-("person_003", "Mike", "Brown", 35, "mike.brown@email.com", "city_003", "Product Manager", 150000),
-("person_004", "Emily", "Davis", 29, "emily.davis@email.com", "city_001", "UX Designer", 105000),
-("person_005", "David", "Wilson", 41, "david.w@email.com", "city_005", "Senior Developer", 140000),
-("person_006", "Lisa", "Anderson", 26, "lisa.a@email.com", "city_004", "Marketing Manager", 95000),
-("person_007", "Robert", "Taylor", 38, "robert.t@email.com", "city_002", "DevOps Engineer", 125000),
-("person_008", "Jennifer", "Martinez", 33, "jennifer.m@email.com", "city_003", "Data Analyst", 85000),
-("person_009", "Kevin", "Garcia", 30, "kevin.g@email.com", "city_001", "Frontend Developer", 110000),
-("person_010", "Amanda", "Rodriguez", 27, "amanda.r@email.com", "city_005", "Backend Developer", 115000),
-("person_011", "Chris", "Lee", 36, "chris.lee@email.com", "city_004", "Tech Lead", 160000),
-("person_012", "Michelle", "White", 31, "michelle.w@email.com", "city_002", "Project Manager", 120000),
-("person_013", "Daniel", "Clark", 25, "daniel.c@email.com", "city_003", "Junior Developer", 75000),
-("person_014", "Jessica", "Lewis", 34, "jessica.l@email.com", "city_001", "Senior Analyst", 135000),
-("person_015", "Matthew", "Walker", 29, "matthew.w@email.com", "city_005", "QA Engineer", 95000)
+("person_001", "John", "Smith", 32, "john.smith@email.com", "city_001", "Software Engineer", 120000, to_datetime("2022-01-15 09:00:00")),
+("person_002", "Sarah", "Johnson", 28, "sarah.j@email.com", "city_002", "Data Scientist", 130000, to_datetime("2021-03-20 10:30:00")),
+("person_003", "Mike", "Brown", 35, "mike.brown@email.com", "city_003", "Product Manager", 150000, to_datetime("2020-06-10 14:15:00")),
+("person_004", "Emily", "Davis", 29, "emily.davis@email.com", "city_001", "UX Designer", 105000, to_datetime("2023-02-01 11:00:00")),
+("person_005", "David", "Wilson", 41, "david.w@email.com", "city_005", "Senior Developer", 140000, to_datetime("2019-08-15 16:30:00")),
+("person_006", "Lisa", "Anderson", 26, "lisa.a@email.com", "city_004", "Marketing Manager", 95000, to_datetime("2022-05-30 13:45:00")),
+("person_007", "Robert", "Taylor", 38, "robert.t@email.com", "city_002", "DevOps Engineer", 125000, to_datetime("2021-11-12 08:20:00")),
+("person_008", "Jennifer", "Martinez", 33, "jennifer.m@email.com", "city_003", "Data Analyst", 85000, to_datetime("2022-09-05 12:10:00")),
+("person_009", "Kevin", "Garcia", 30, "kevin.g@email.com", "city_001", "Frontend Developer", 110000, to_datetime("2023-01-20 15:00:00")),
+("person_010", "Amanda", "Rodriguez", 27, "amanda.r@email.com", "city_005", "Backend Developer", 115000, to_datetime("2021-07-18 09:45:00")),
+("person_011", "Chris", "Lee", 36, "chris.lee@email.com", "city_004", "Tech Lead", 160000, to_datetime("2020-12-01 17:00:00")),
+("person_012", "Michelle", "White", 31, "michelle.w@email.com", "city_002", "Project Manager", 120000, to_datetime("2022-04-15 14:30:00")),
+("person_013", "Daniel", "Clark", 25, "daniel.c@email.com", "city_003", "Junior Developer", 75000, to_datetime("2023-06-01 10:15:00")),
+("person_014", "Jessica", "Lewis", 34, "jessica.l@email.com", "city_001", "Senior Analyst", 135000, to_datetime("2021-10-25 11:45:00")),
+("person_015", "Matthew", "Walker", 29, "matthew.w@email.com", "city_005", "QA Engineer", 95000, to_datetime("2022-08-30 13:20:00"))
 
 # Insert Work Relationships
 INSERT INTO WORKS_AT VALUES 
-("person_001", "comp_001", "2022-01-15", "Software Engineer", "Engineering"),
-("person_002", "comp_002", "2021-03-20", "Data Scientist", "Analytics"),
-("person_003", "comp_003", "2020-06-10", "Product Manager", "Product"),
-("person_004", "comp_001", "2023-02-01", "UX Designer", "Design"),
-("person_005", "comp_005", "2019-08-15", "Senior Developer", "Engineering"),
-("person_006", "comp_004", "2022-05-30", "Marketing Manager", "Marketing"),
-("person_007", "comp_002", "2021-11-12", "DevOps Engineer", "Infrastructure"),
-("person_008", "comp_003", "2022-09-05", "Data Analyst", "Analytics"),
-("person_009", "comp_001", "2023-01-20", "Frontend Developer", "Engineering"),
-("person_010", "comp_005", "2021-07-18", "Backend Developer", "Engineering"),
-("person_011", "comp_004", "2020-12-01", "Tech Lead", "Engineering"),
-("person_012", "comp_007", "2022-04-15", "Project Manager", "Operations"),
-("person_013", "comp_003", "2023-06-01", "Junior Developer", "Engineering"),
-("person_014", "comp_006", "2021-10-25", "Senior Analyst", "Analytics"),
-("person_015", "comp_005", "2022-08-30", "QA Engineer", "Quality")
+("person_001", "comp_001", to_datetime("2022-01-15 09:00:00"), "Software Engineer", "Engineering", TRUE),
+("person_002", "comp_002", to_datetime("2021-03-20 10:30:00"), "Data Scientist", "Analytics", TRUE),
+("person_003", "comp_003", to_datetime("2020-06-10 14:15:00"), "Product Manager", "Product", TRUE),
+("person_004", "comp_001", to_datetime("2023-02-01 11:00:00"), "UX Designer", "Design", TRUE),
+("person_005", "comp_005", to_datetime("2019-08-15 16:30:00"), "Senior Developer", "Engineering", TRUE),
+("person_006", "comp_004", to_datetime("2022-05-30 13:45:00"), "Marketing Manager", "Marketing", TRUE),
+("person_007", "comp_002", to_datetime("2021-11-12 08:20:00"), "DevOps Engineer", "Infrastructure", TRUE),
+("person_008", "comp_003", to_datetime("2022-09-05 12:10:00"), "Data Analyst", "Analytics", TRUE),
+("person_009", "comp_001", to_datetime("2023-01-20 15:00:00"), "Frontend Developer", "Engineering", TRUE),
+("person_010", "comp_005", to_datetime("2021-07-18 09:45:00"), "Backend Developer", "Engineering", TRUE),
+("person_011", "comp_004", to_datetime("2020-12-01 17:00:00"), "Tech Lead", "Engineering", TRUE),
+("person_012", "comp_007", to_datetime("2022-04-15 14:30:00"), "Project Manager", "Operations", TRUE),
+("person_013", "comp_003", to_datetime("2023-06-01 10:15:00"), "Junior Developer", "Engineering", TRUE),
+("person_014", "comp_006", to_datetime("2021-10-25 11:45:00"), "Senior Analyst", "Analytics", TRUE),
+("person_015", "comp_005", to_datetime("2022-08-30 13:20:00"), "QA Engineer", "Quality", TRUE)
 
 # Insert Location Relationships
 INSERT INTO LOCATED_IN VALUES 
-("person_001", "city_001"), ("person_002", "city_002"), ("person_003", "city_003"),
-("person_004", "city_001"), ("person_005", "city_005"), ("person_006", "city_004"),
-("person_007", "city_002"), ("person_008", "city_003"), ("person_009", "city_001"),
-("person_010", "city_005"), ("person_011", "city_004"), ("person_012", "city_002"),
-("person_013", "city_003"), ("person_014", "city_001"), ("person_015", "city_005"),
-("comp_001", "city_001"), ("comp_002", "city_002"), ("comp_003", "city_003"),
-("comp_004", "city_004"), ("comp_005", "city_005"), ("comp_006", "city_001"), ("comp_007", "city_002")
+("person_001", "city_001", to_datetime("2022-01-01 00:00:00")),
+("person_002", "city_002", to_datetime("2021-01-01 00:00:00")),
+("person_003", "city_003", to_datetime("2020-01-01 00:00:00")),
+("person_004", "city_001", to_datetime("2023-01-01 00:00:00")),
+("person_005", "city_005", to_datetime("2019-01-01 00:00:00")),
+("person_006", "city_004", to_datetime("2022-01-01 00:00:00")),
+("person_007", "city_002", to_datetime("2021-01-01 00:00:00")),
+("person_008", "city_003", to_datetime("2022-01-01 00:00:00")),
+("person_009", "city_001", to_datetime("2023-01-01 00:00:00")),
+("person_010", "city_005", to_datetime("2021-01-01 00:00:00")),
+("person_011", "city_004", to_datetime("2020-01-01 00:00:00")),
+("person_012", "city_002", to_datetime("2022-01-01 00:00:00")),
+("person_013", "city_003", to_datetime("2023-01-01 00:00:00")),
+("person_014", "city_001", to_datetime("2021-01-01 00:00:00")),
+("person_015", "city_005", to_datetime("2022-01-01 00:00:00")),
+("comp_001", "city_001", to_datetime("2010-01-01 00:00:00")),
+("comp_002", "city_002", to_datetime("2015-01-01 00:00:00")),
+("comp_003", "city_003", to_datetime("2008-01-01 00:00:00")),
+("comp_004", "city_004", to_datetime("2020-01-01 00:00:00")),
+("comp_005", "city_005", to_datetime("2005-01-01 00:00:00")),
+("comp_006", "city_001", to_datetime("2018-01-01 00:00:00")),
+("comp_007", "city_002", to_datetime("2012-01-01 00:00:00"))
 
 # Insert Friendships
 INSERT INTO FRIENDS_WITH VALUES 
-("person_001", "person_004", "2022-02-01", 0.9),
-("person_001", "person_009", "2023-03-15", 0.8),
-("person_002", "person_007", "2021-05-20", 0.85),
-("person_003", "person_008", "2022-10-10", 0.75),
-("person_004", "person_009", "2023-02-28", 0.9),
-("person_005", "person_010", "2021-08-01", 0.95),
-("person_006", "person_011", "2022-06-15", 0.8),
-("person_007", "person_012", "2022-05-01", 0.7),
-("person_008", "person_013", "2023-07-01", 0.6),
-("person_009", "person_014", "2023-04-10", 0.85),
-("person_010", "person_015", "2022-09-15", 0.9),
-("person_002", "person_012", "2021-12-01", 0.75),
-("person_003", "person_013", "2023-06-15", 0.7),
-("person_005", "person_015", "2022-09-01", 0.8)
+("person_001", "person_004", to_datetime("2022-02-01 12:00:00"), 0.9),
+("person_001", "person_009", to_datetime("2023-03-15 14:30:00"), 0.8),
+("person_002", "person_007", to_datetime("2021-05-20 16:45:00"), 0.85),
+("person_003", "person_008", to_datetime("2022-10-10 11:20:00"), 0.75),
+("person_004", "person_009", to_datetime("2023-02-28 13:15:00"), 0.9),
+("person_005", "person_010", to_datetime("2021-08-01 10:30:00"), 0.95),
+("person_006", "person_011", to_datetime("2022-06-15 15:45:00"), 0.8),
+("person_007", "person_012", to_datetime("2022-05-01 09:20:00"), 0.7),
+("person_008", "person_013", to_datetime("2023-07-01 17:10:00"), 0.6),
+("person_009", "person_014", to_datetime("2023-04-10 12:45:00"), 0.85),
+("person_010", "person_015", to_datetime("2022-09-15 14:20:00"), 0.9),
+("person_002", "person_012", to_datetime("2021-12-01 11:00:00"), 0.75),
+("person_003", "person_013", to_datetime("2023-06-15 16:30:00"), 0.7),
+("person_005", "person_015", to_datetime("2022-09-01 13:45:00"), 0.8)
 
 # Insert Follows (Professional network)
 INSERT INTO FOLLOWS VALUES 
-("person_001", "person_003", "2022-01-20"),
-("person_002", "person_005", "2021-04-15"),
-("person_004", "person_001", "2023-02-10"),
-("person_006", "person_011", "2022-06-01"),
-("person_007", "person_002", "2021-11-20"),
-("person_008", "person_003", "2022-09-10"),
-("person_009", "person_001", "2023-01-25"),
-("person_010", "person_005", "2021-07-25"),
-("person_013", "person_008", "2023-06-05"),
-("person_014", "person_009", "2023-04-15")
+("person_001", "person_003", to_datetime("2022-01-20 10:00:00")),
+("person_002", "person_005", to_datetime("2021-04-15 14:30:00")),
+("person_004", "person_001", to_datetime("2023-02-10 11:15:00")),
+("person_006", "person_011", to_datetime("2022-06-01 16:20:00")),
+("person_007", "person_002", to_datetime("2021-11-20 09:45:00")),
+("person_008", "person_003", to_datetime("2022-09-10 15:30:00")),
+("person_009", "person_001", to_datetime("2023-01-25 12:10:00")),
+("person_010", "person_005", to_datetime("2021-07-25 13:50:00")),
+("person_013", "person_008", to_datetime("2023-06-05 17:25:00")),
+("person_014", "person_009", to_datetime("2023-04-15 11:40:00"))
 
 # Insert Company Partnerships
 INSERT INTO PARTNERS_WITH VALUES 
-("comp_001", "comp_006", "Technology Partnership", "2023-01-01", 2000000.0),
-("comp_002", "comp_007", "Security Services", "2022-06-15", 1500000.0),
-("comp_003", "comp_001", "Cloud Infrastructure", "2022-03-01", 5000000.0),
-("comp_004", "comp_002", "Data Analytics", "2023-02-15", 500000.0),
-("comp_005", "comp_007", "Cybersecurity", "2022-11-01", 3000000.0)
+("comp_001", "comp_006", "Technology Partnership", to_datetime("2023-01-01 09:00:00"), 2000000.0),
+("comp_002", "comp_007", "Security Services", to_datetime("2022-06-15 14:30:00"), 1500000.0),
+("comp_003", "comp_001", "Cloud Infrastructure", to_datetime("2022-03-01 10:15:00"), 5000000.0),
+("comp_004", "comp_002", "Data Analytics", to_datetime("2023-02-15 16:45:00"), 500000.0),
+("comp_005", "comp_007", "Cybersecurity", to_datetime("2022-11-01 11:30:00"), 3000000.0)
 
 # ================================
 # CREATE AND INSTALL QUERIES
@@ -242,7 +257,7 @@ CREATE QUERY FindConnections(STRING source_person, STRING target_person, INT max
     END;
     
     # Also check work connections
-    work_connections = SELECT t FROM Person:s -(WORKS_AT)- Company:c -(_)- Person:t
+    work_connections = SELECT t FROM Person:s -(WORKS_AT)- Company:c -(WORKS_AT)- Person:t
                       WHERE s.id == source_person AND t.id == target_person
                       ACCUM @@paths += ConnectionPath(s.id, t.id, "WORK_COLLEAGUE", 
                                                     s.first_name + " works with " + t.first_name + " at " + c.name);
